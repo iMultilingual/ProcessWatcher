@@ -28,13 +28,8 @@ namespace Github
         protected virtual void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             Process[] Processes = Process.GetProcessesByName(this.ProcessName);
-
-            if (Processes.Length == 1)
-            {
-                this.OnProcessCreated(Processes[0]);
-
-                Created?.Invoke();
-            }
+            for (int I = 0; I < Processes.Length; I++)
+                if (I > 1) { this.OnProcessCreated(Process[I]); Created?.Invoke(); }
         }
 
         protected virtual void OnProcessCreated(Process Process)
