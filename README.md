@@ -8,16 +8,14 @@ namespace Example
 {
     class Program
     {
-        public static ProcessWatcher Watcher { get; } = new("RobloxPlayerBeta")
-        {
-            Interval = 1000,
-        };
+        public static ProcessWatcher Watcher { get; } = new("RobloxPlayerBeta") { Interval = 1000 };
         
         static void Main(string[] args)
         {
-            Watcher.Created += (Sender, Handler) => Console.WriteLine("RobloxPlayerBeta is running.");
+            Watcher.Created += (Proc) => Console.WriteLine("Process Name: {0}, Process Id: {1}", Proc.ProcessName, Proc.Id);
+            Watcher.Init();
             
-            Watcher.Init() //To initialize EventHandler.
+            Thread.Sleep(-1);
         }
     }
 }
