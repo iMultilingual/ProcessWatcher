@@ -6,16 +6,27 @@ namespace Github
 {
     public class ProcessWatcher : IDisposable
     {
-        public delegate void CreatedDelegate();
+        #region Handler
+        public delegate void CreatedDelegate(Process Proc);
         public event CreatedDelegate Created;
+        #endregion
 
+        #region Fields
         private Timer Timer { get; } = new();
         private string ProcessName;
+        private Process[] Processes;
         private Process Process;
+        #endregion
 
+        #region Boolean
         private bool IsDisposed = false;
-        public double Interval { get; set; }
+        #endregion
 
+        #region Property
+        public double Interval { get; set; }
+        #endregion
+
+        #region Structure
         public ProcessWatcher(string ProcessName) => this.ProcessName = ProcessName;
 
         public void Init()
@@ -27,29 +38,30 @@ namespace Github
 
         protected virtual void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Process[] Processes = Process.GetProcessesByName(this.ProcessName);
-            for (int I = 0; I < Processes.Length; I++)
-                if (I > 1) { this.OnProcessCreated(Process[I]); Created?.Invoke(); }
+            Processes = Process.GetProcessesByName(this.ProcessName);
+            if (Processes.Length < 1) return;
+
+            this.OnProcessCreated(Processes[0]);
+            Created?.Invoke(Processes[0]);
         }
 
         protected virtual void OnProcessCreated(Process Process)
         {
             this.Timer.Stop();
             this.Process = Process;
-            this.Process.EnableRaisingEvents = true;
+            Process.EnableRaisingEvents = true;
 
-            this.Process.Exited += (sender, args) => this.Timer.Start();
+            Process.Exited += (Sender, Handler) => Timer.Start();
         }
 
-        protected virtual void Dispose()
+        public void Dispose()
         {
             if (IsDisposed) return;
-            
+
             Timer.Dispose();
             IsDisposed = true;
             GC.SuppressFinalize(this);
         }
-
-        public void Dispose() => this.Dispose();
+        #endregion
     }
 }
